@@ -16,7 +16,7 @@ const App = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    
+
     const newMessages = [...messages, { role: "user", content: input }];
     setMessages(newMessages);
     setInput("");
@@ -26,15 +26,21 @@ const App = () => {
       const response = await fetch("https://ai-chatbot-wde5.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: input }),
       });
+
       const data = await response.json();
-      setMessages([...newMessages, { role: "bot", content: data.reply }]);
+      
+      // Simulate bot typing delay for a better experience
+      setTimeout(() => {
+        setMessages([...newMessages, { role: "bot", content: data.reply }]);
+        setLoading(false);
+      }, 1500);
+      
     } catch (error) {
       setMessages([...newMessages, { role: "bot", content: "Error: Could not fetch response." }]);
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleKeyPress = (e) => {
@@ -52,7 +58,11 @@ const App = () => {
             <strong>{msg.role === "user" ? "You: " : "Bot: "}</strong>{msg.content}
           </div>
         ))}
-        {loading && <div className="bot-msg">Bot: Typing...</div>}
+        {loading && (
+          <div className="bot-msg typing">
+            <span></span> <span></span> <span></span>
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
       <div className="input-box">
